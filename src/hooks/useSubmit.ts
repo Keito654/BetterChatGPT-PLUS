@@ -12,6 +12,7 @@ import { limitMessageTokens, updateTotalTokenUsed } from '@utils/messageUtils';
 import { _defaultChatConfig } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
 import { modelStreamSupport } from '@constants/modelLoader';
+import { ChatCompletionsOutput } from '@azure-rest/ai-inference';
 
 const useSubmit = () => {
   const { t, i18n } = useTranslation('api');
@@ -28,7 +29,7 @@ const useSubmit = () => {
     message: MessageInterface[],
     modelConfig: ConfigInterface
   ): Promise<string> => {
-    let data;
+    let data: ChatCompletionsOutput | null = null;
     try {
       if (!apiKey || apiKey.length === 0) {
         // official endpoint
@@ -68,6 +69,11 @@ const useSubmit = () => {
         `${t('errors.errorGeneratingTitle')}\n${(error as Error).message}`
       );
     }
+
+    if(!data || !data.choices[0].message.content) {
+      throw new Error(t('errors.failedToRetrieveData') as string)
+    }
+
     return data.choices[0].message.content;
   };
 
@@ -187,8 +193,10 @@ const useSubmit = () => {
         }
 
         if (stream) {
-          if (stream.locked)
+          if (stream.locked){
             throw new Error(t('errors.streamLocked') as string);
+          }
+
           const reader = stream.getReader();
           let reading = true;
           let partial = '';
@@ -222,7 +230,7 @@ const useSubmit = () => {
               ).text += resultString;
               setChats(updatedChats);
             }
-          }
+          }         
           if (useStore.getState().generating) {
             reader.cancel(t('errors.cancelledByUser') as string);
           } else {
