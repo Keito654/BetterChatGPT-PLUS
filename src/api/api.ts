@@ -28,8 +28,14 @@ export const getChatCompletion = async (
 
   var response = await client.path(`/chat/completions`).post({
     body: {
-        messages: messages,
-        model: config.model
+      messages: messages,
+      model: config.model,
+      stream: false,
+      max_tokens: config.max_tokens,
+      temperature: config.temperature,
+      presence_penalty:config.presence_penalty,
+      top_p: config.top_p,
+      frequency_penalty: config.frequency_penalty,
     }
   }); 
 
@@ -62,7 +68,12 @@ export const getChatCompletionStream = async (
     body: {
         messages: messages,
         model: config.model,
-        stream: true
+        stream: true,
+        max_tokens: config.max_tokens,
+        temperature: config.temperature,
+        presence_penalty:config.presence_penalty,
+        top_p: config.top_p,
+        frequency_penalty: config.frequency_penalty,
     }
   }).asBrowserStream(); 
 
