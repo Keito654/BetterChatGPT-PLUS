@@ -1,8 +1,5 @@
 import { ShareGPTSubmitBodyInterface } from '@type/api';
-import {
-  ConfigInterface,
-  MessageInterface,
-} from '@type/chat';
+import { ConfigInterface, MessageInterface } from '@type/chat';
 import { isAzureEndpoint } from '@utils/api';
 import { ModelOptions } from '@utils/modelReader';
 
@@ -50,11 +47,27 @@ export const getChatCompletion = async (
   }
   endpoint = endpoint.trim();
 
+  const isO1Model = config.model.includes('o1') || config.model.includes('o3');
+
+  let adjustedMessages = null;
+  if (isO1Model) {
+    if (isAzureEndpoint(endpoint)) {
+      adjustedMessages = messages.filter(
+        (message) => message.role !== 'system'
+      );
+    } else {
+      adjustedMessages = messages.map((message) => ({
+        ...message,
+        role: message.role === 'system' ? 'developer' : message.role,
+      }));
+    }
+  }
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers,
     body: JSON.stringify({
-      messages,
+      messages: adjustedMessages ?? messages,
       ...config,
       max_tokens: undefined,
     }),
@@ -105,11 +118,28 @@ export const getChatCompletionStream = async (
     }
   }
   endpoint = endpoint.trim();
+
+  const isO1Model = config.model.includes('o1') || config.model.includes('o3');
+
+  let adjustedMessages = null;
+  if (isO1Model) {
+    if (isAzureEndpoint(endpoint)) {
+      adjustedMessages = messages.filter(
+        (message) => message.role !== 'system'
+      );
+    } else {
+      adjustedMessages = messages.map((message) => ({
+        ...message,
+        role: message.role === 'system' ? 'developer' : message.role,
+      }));
+    }
+  }
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers,
     body: JSON.stringify({
-      messages,
+      messages: adjustedMessages ?? messages,
       ...config,
       max_tokens: undefined,
       stream: true,
