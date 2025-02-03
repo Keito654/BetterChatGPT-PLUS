@@ -38,6 +38,7 @@ const useSubmit = () => {
         }
         const titleChatConfig = {
           ..._defaultChatConfig, // Spread the original config
+          max_tokens: 4000,
           model: useStore.getState().titleModel ?? _defaultChatConfig.model, // Override the model property
         };
         // other endpoints
@@ -52,6 +53,7 @@ const useSubmit = () => {
       } else if (apiKey) {
         const titleChatConfig = {
           ...modelConfig, // Spread the original config
+          max_tokens: 4000,
           model: useStore.getState().titleModel ?? modelConfig.model, // Override the model property
         };
         // own apikey
@@ -70,8 +72,8 @@ const useSubmit = () => {
       );
     }
 
-    if(!data || !data.choices[0].message.content) {
-      throw new Error(t('errors.failedToRetrieveData') as string)
+    if (!data || !data.choices[0].message.content) {
+      throw new Error(t('errors.failedToRetrieveData') as string);
     }
 
     return data.choices[0].message.content;
@@ -99,13 +101,13 @@ const useSubmit = () => {
     try {
       const isStreamSupported =
         modelStreamSupport[chats[currentChatIndex].config.model];
-        const { model, temperature, max_tokens } = chats[currentChatIndex].config;
-        const supportsStream = modelStreamSupport[model];
-        console.log('[useSubmit] Model streaming support:', {
-          model,
-          supportsStream,
-          isStreamSupported
-        });
+      const { model, temperature, max_tokens } = chats[currentChatIndex].config;
+      const supportsStream = modelStreamSupport[model];
+      console.log('[useSubmit] Model streaming support:', {
+        model,
+        supportsStream,
+        isStreamSupported,
+      });
       let data;
       let stream;
       if (chats[currentChatIndex].messages.length === 0)
@@ -193,7 +195,7 @@ const useSubmit = () => {
         }
 
         if (stream) {
-          if (stream.locked){
+          if (stream.locked) {
             throw new Error(t('errors.streamLocked') as string);
           }
 
@@ -230,7 +232,7 @@ const useSubmit = () => {
               ).text += resultString;
               setChats(updatedChats);
             }
-          }         
+          }
           if (useStore.getState().generating) {
             reader.cancel(t('errors.cancelledByUser') as string);
           } else {
