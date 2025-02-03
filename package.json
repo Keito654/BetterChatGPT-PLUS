@@ -69,7 +69,7 @@
       "icon": "dist/icon-rounded.png"
     },
     "win": {
-      "target": "NSIS",
+      "target": "zip",
       "icon": "dist/icon-rounded.png"
     }
   },
